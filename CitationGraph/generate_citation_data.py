@@ -15,25 +15,24 @@ def process_dir(data_dir):
     ops = parse_files(case_files)
 
     # Write to file
-    np.savetxt(data_dir + '.txt', np.array(ops), fmt='%s')
+    np.savetxt(data_dir + '.txt', ops, fmt='%s')
 
-
-def get_files(dir):
+def get_files(data_dir):
     """
     Returns the files in a directory
     """
 
-    if os.path.exists(dir):
-        return [os.path.join(dir, f) for f in os.listdir(dir) if is_valid_file(dir, f)]
+    if os.path.exists(data_dir):
+        return [os.path.join(data_dir, f) for f in os.listdir(data_dir) if is_valid_file(data_dir, f)]
 
     return None
 
-def is_valid_file(dir, path):
+def is_valid_file(data_dir, path):
     """
     Checks if a given path points to a valid file
     """
     if not_ds_store(path):
-        if os.path.isfile(os.path.join(dir, path)):
+        if os.path.isfile(os.path.join(data_dir, path)):
             return True
 
     return False
@@ -49,7 +48,7 @@ def parse_files(files):
     """
     Parses all the case files provided as input and generates the citation data
     :param files: List of paths of files who contain the case data
-    :return: A list of tuples containing (Case ID, Cite ID, [Citations])
+    :return: A list of tuples containing (Case ID, [Citations])
     """
 
     ops = []
@@ -66,54 +65,37 @@ def parse_single_file(cfile):
     Parses a single case file and extracts its Cite ID and the list of citations from it
     """
 
-    filename = (os.path.splitext(cfile)[0]).split('/')[1]
+    case_id = None
 
     soup = BeautifulSoup(read_file_to_string(cfile), "lxml")
 
-    # Identify its name
-    name = None
-    for h2tag in soup.find_all('h2', {'class': 'organization'}):
+    # Parse case ID
+    for metadata_tag in soup.find_all('div', {'class': 'docId'}):
 
-        temp = h2tag.contents[2].split(',')[-1]
-        name = clean_cite_id(str(temp.split('(')[0].strip()))
-        break
+        if metadata_tag is not None:
+            case_id = str(metadata_tag.contents[0])
+            break
 
     # Identify backwards citations
     b_citations = []
-    for atag in soup.find_all('a'):
+    for a_tag in soup.find_all('a'):
 
-        if (atag is None) or (not atag.has_attr('href')):
+        if (a_tag is None) or (not a_tag.has_attr('href')):
             continue
 
-        href = atag.get('href')
+        href = a_tag.get('href')
 
         if '#jcite' in href:
             try:
-                citation = clean_cite_id( (''.join([str(x) for x in atag.contents])) )
-                b_citations.append(str(citation).encode('ascii', 'ignore'))
+                cited_doc_id = ((href.split('/'))[-1]).split('?')[0]
+                b_citations.append(cited_doc_id)
+
             except:
                 # Non ascii string can cause an exception
+                # Handling them is not really required for this dataset
                 pass
 
-    return filename, name, b_citations
-
-
-
-def clean_cite_id(text):
-    """
-    Cleans the provided HTML string to adhere to the standardized format of a Cite ID
-    """
-
-    return strip_tags(text.translate(None, ' []\'.,')).lower()
-
-
-def strip_tags(text):
-    """
-    Removes all tags from the provided text
-    """
-
-    text = re.sub('<[^<]+?>', '', text)
-    return text
+    return case_id, ','.join(b_citations)
 
 
 def read_file_to_string(cfile):
@@ -130,7 +112,7 @@ def main():
 
     start = time.time()
 
-    data_dir = '1880_complete'
+    data_dir = '1881_complete'
     process_dir(data_dir)
 
     print('*** Completed processing in ', time.time() - start, '(s)')
