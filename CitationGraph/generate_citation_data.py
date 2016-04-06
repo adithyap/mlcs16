@@ -1,46 +1,21 @@
-import os
 import time
 import numpy as np
 from bs4 import BeautifulSoup
+import helper
 
 
 def process_dir(data_dir):
     """
     Processes a directory containing a set of case documents and generates the citation data.
-    The citatation data thus generated shall be stored in {data_dir}.txt.
+    The citation data thus generated shall be stored in {data_dir}.txt.
     """
 
-    case_files = get_files(data_dir)
+    case_files = helper.get_files(data_dir)
     ops = parse_files(case_files)
 
     # Write to file
     np.savetxt(data_dir + '.txt', ops, fmt='%s')
 
-def get_files(data_dir):
-    """
-    Returns the files in a directory
-    """
-
-    if os.path.exists(data_dir):
-        return [os.path.join(data_dir, f) for f in os.listdir(data_dir) if is_valid_file(data_dir, f)]
-
-    return None
-
-def is_valid_file(data_dir, path):
-    """
-    Checks if a given path points to a valid file
-    """
-    if not_ds_store(path):
-        if os.path.isfile(os.path.join(data_dir, path)):
-            return True
-
-    return False
-
-def not_ds_store(f):
-    """
-    Mac specific - checks if the file is system file (.DS_Store) or not
-    """
-    return f != '.DS_Store'
 
 
 def parse_files(files):
@@ -66,7 +41,7 @@ def parse_single_file(cfile):
 
     case_id = None
 
-    soup = BeautifulSoup(read_file_to_string(cfile), "lxml")
+    soup = BeautifulSoup(helper.read_file_to_string(cfile), "lxml")
 
     # Parse case ID
     for metadata_tag in soup.find_all('div', {'class': 'docId'}):
@@ -95,16 +70,6 @@ def parse_single_file(cfile):
                 pass
 
     return case_id, ','.join(b_citations)
-
-
-def read_file_to_string(cfile):
-    """
-    Reads the content of a file into a string
-    """
-
-    with open(cfile, 'r') as myfile:
-        data = myfile.read()
-        return data
 
 
 def main():

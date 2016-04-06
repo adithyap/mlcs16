@@ -1,48 +1,20 @@
 import os
 import time
 from bs4 import BeautifulSoup
+import helper
 
 
 def process_dir(data_dir):
     """
-    Processes a directory containing a set of case documents and generates the citation data.
-    The citatation data thus generated shall be stored in {data_dir}.txt.
+    Processes a directory containing a set of case documents and extracts the case data.
+    The case data thus extracted shall be stored in {data_dir}/txt/.
     """
 
-    case_files = get_files(data_dir)
-
-    # case_files = case_files[:20]
+    case_files = helper.get_files(data_dir)
 
     ops = parse_files(case_files)
 
     write_files(ops, os.path.join(data_dir, 'txt'))
-
-
-def get_files(data_dir):
-    """
-    Returns the files in a directory
-    """
-
-    if os.path.exists(data_dir):
-        return [os.path.join(data_dir, f) for f in os.listdir(data_dir) if is_valid_file(data_dir, f)]
-
-    return None
-
-def is_valid_file(data_dir, path):
-    """
-    Checks if a given path points to a valid file
-    """
-    if not_ds_store(path):
-        if os.path.isfile(os.path.join(data_dir, path)):
-            return True
-
-    return False
-
-def not_ds_store(f):
-    """
-    Mac specific - checks if the file is system file (.DS_Store) or not
-    """
-    return f != '.DS_Store'
 
 
 def parse_files(files):
@@ -60,9 +32,10 @@ def parse_files(files):
 
     return ops
 
+
 def get_case_data(cfile):
 
-    soup = BeautifulSoup(read_file_to_string(cfile), "lxml")
+    soup = BeautifulSoup(helper.read_file_to_string(cfile), "lxml")
 
     case_id = None
     case_data = None
@@ -81,6 +54,7 @@ def get_case_data(cfile):
 
     return case_id, case_data
 
+
 def write_files(fdata, data_dir):
     """
     Expects a list of tuples, containing (case_id, case_data)
@@ -88,7 +62,7 @@ def write_files(fdata, data_dir):
     All the files will be written into {data_dir} directory
     """
 
-    ensure_dir(data_dir)
+    helper.ensure_dir(data_dir)
 
     for case_id, case_data in fdata:
 
@@ -100,25 +74,6 @@ def write_files(fdata, data_dir):
         f.close()
 
     pass
-
-
-def read_file_to_string(cfile):
-    """
-    Reads the content of a file into a string
-    """
-
-    with open(cfile, 'r') as myfile:
-        data = myfile.read()
-        return data
-
-
-def ensure_dir(directory):
-    """
-    Ensures that the specified directory exists, creates if it doesn't exist
-    """
-
-    if not os.path.exists(directory):
-        os.makedirs(directory)
 
 
 def main():
