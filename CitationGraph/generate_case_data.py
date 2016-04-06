@@ -1,6 +1,5 @@
 import os
 import time
-import numpy as np
 from bs4 import BeautifulSoup
 
 
@@ -11,10 +10,13 @@ def process_dir(data_dir):
     """
 
     case_files = get_files(data_dir)
+
+    # case_files = case_files[:20]
+
     ops = parse_files(case_files)
 
-    # Write to file
-    np.savetxt(data_dir + '.txt', ops, fmt='%s')
+    write_files(ops, os.path.join(data_dir, 'txt'))
+
 
 def get_files(data_dir):
     """
@@ -54,47 +56,50 @@ def parse_files(files):
 
     for i in range(len(files)):
 
-        ops.append(parse_single_file(files[i]))
+        ops.append((get_case_data(files[i])))
 
     return ops
 
-
-def parse_single_file(cfile):
-    """
-    Parses a single case file and extracts its Cite ID and the list of citations from it
-    """
-
-    case_id = None
+def get_case_data(cfile):
 
     soup = BeautifulSoup(read_file_to_string(cfile), "lxml")
 
-    # Parse case ID
-    for metadata_tag in soup.find_all('div', {'class': 'docId'}):
+    case_id = None
+    case_data = None
 
+    for metadata_tag in soup.find_all('div', {'class': 'docId'}):
         if metadata_tag is not None:
             case_id = str(metadata_tag.contents[0])
             break
 
-    # Identify backwards citations
-    b_citations = []
-    for a_tag in soup.find_all('a'):
+    for content_tag in soup.find_all('div', {'id': 'contentMajOp'}):
+        if content_tag is not None:
+            case_data = content_tag.get_text()
+            break
 
-        if (a_tag is None) or (not a_tag.has_attr('href')):
+    # print('Completed', case_id)
+
+    return case_id, case_data
+
+def write_files(fdata, data_dir):
+    """
+    Expects a list of tuples, containing (case_id, case_data)
+    Writes the {case_data} into {case_id}.txt
+    All the files will be written into {data_dir} directory
+    """
+
+    ensure_dir(data_dir)
+
+    for case_id, case_data in fdata:
+
+        if (case_id is None) or (case_data is None):
             continue
 
-        href = a_tag.get('href')
+        f = open(os.path.join(data_dir, case_id + '.txt'), 'w')
+        f.write(case_data.encode('utf8'))
+        f.close()
 
-        if '#jcite' in href:
-            try:
-                cited_doc_id = ((href.split('/'))[-1]).split('?')[0]
-                b_citations.append(cited_doc_id)
-
-            except:
-                # Non ascii string can cause an exception
-                # Handling them is not really required for this dataset
-                pass
-
-    return case_id, ','.join(b_citations)
+    pass
 
 
 def read_file_to_string(cfile):
@@ -105,6 +110,15 @@ def read_file_to_string(cfile):
     with open(cfile, 'r') as myfile:
         data = myfile.read()
         return data
+
+
+def ensure_dir(directory):
+    """
+    Ensures that the specified directory exists, creates if it doesn't exist
+    """
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 
 def main():
