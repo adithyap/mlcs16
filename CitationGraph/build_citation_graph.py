@@ -20,7 +20,7 @@ def main():
     index_map = dict()
 
     connections = 0
-    DATA_FILE = 'Data/merged_caselevel_data.csv'
+    DATA_FILE = '/scratch/sv1239/projects/mlcs/raw/merged_caselevel_data.csv'
 
     merged_caselevel = pd.read_csv(DATA_FILE, low_memory=False)
 
