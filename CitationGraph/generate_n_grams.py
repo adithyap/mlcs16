@@ -9,6 +9,8 @@ from nltk import CFG
 import numpy as np
 import os
 
+import csv
+
 grammar_string = """
   S -> TWO | THREE | FOUR
 
@@ -33,7 +35,7 @@ terminals = {'JJ': None, 'JJR': None, 'JJS': None, 'NN': None, 'NNS': None, 'NNP
              'WDT': None}
 
 
-def process_dir(data_dir, MIN_N_GRAM, MAX_N_GRAM):
+def process_dir(data_dir, MIN_N_GRAM, MAX_N_GRAM, b_verbose=False, b_size=None):
     """
     Processes a directory containing a set of case documents and generates n-grams.
     The n-grams thus generated shall be stored in {data_dir}/n-grams/
@@ -47,7 +49,11 @@ def process_dir(data_dir, MIN_N_GRAM, MAX_N_GRAM):
     # Get the case file list
     case_files = helper.get_files(data_dir)
 
-    # case_files = case_files[:5]
+    if b_size is not None:
+        case_files = case_files[:b_size]
+
+    total_count = len(case_files)
+    progress = 0
 
     for case_file in case_files:
 
@@ -58,7 +64,7 @@ def process_dir(data_dir, MIN_N_GRAM, MAX_N_GRAM):
         # Read the case data from the string
         case_data = helper.read_file_to_string(case_file)
 
-        valid_n_grams = []
+        valid_n_grams = {}
 
         # Go over every sentence in the document
         for sentence in get_sentences(case_data):
@@ -71,21 +77,31 @@ def process_dir(data_dir, MIN_N_GRAM, MAX_N_GRAM):
             # Generate N-Grams of tags
             n_grams = []
             for n in range(MIN_N_GRAM, MAX_N_GRAM + 1):
-                # n_grams.extend([list(grams) for grams in ngrams(pos_tags, n)])
                 n_grams.extend([list(grams) for grams in ngrams(range(len(pos_tuples)), n)])
 
             # Get only the n-grams that match the defined grammar
-
             for i in range(len(n_grams)):
 
                 # Generate n-gram list and check validity
                 if parse([pos_tags[j] for j in n_grams[i]]):
 
                     # Append words to overall list
-                    valid_n_grams.append([pos_tuples[k][0] for k in n_grams[i]])
+                    elements = ' '.join([pos_tuples[k][0] for k in n_grams[i]])
+
+                    if elements in valid_n_grams:
+                        valid_n_grams[elements] += 1
+                    else:
+                        valid_n_grams[elements] = 1
 
         # Save n-grams to file
-        save_list_to_file(target_path, valid_n_grams)
+        helper.save_dict_to_file(target_path, valid_n_grams)
+
+        progress += 1
+
+        if b_verbose:
+            print(progress / (0.01 * total_count), ' % Complete')
+
+    return target_dir
 
 
 def get_pos_tags(pos_tuples):
@@ -122,13 +138,6 @@ def get_pos_tags(pos_tuples):
     return pos_tags
 
 
-def save_list_to_file(target_path, list_to_save):
-    """
-    Saves the provided list into the specified path
-    """
-
-    np.savetxt(target_path, list_to_save, fmt='%s')
-
 def get_sentences(case_data):
     """
     Returns a list of sentences from a string of possibly many sentences
@@ -154,7 +163,6 @@ def parse(text):
         break
 
     return valid_parse
-
 
 
 def main():

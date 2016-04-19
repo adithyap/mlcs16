@@ -1,4 +1,8 @@
 import os
+import zipfile
+import shutil
+import numpy as np
+import csv
 
 
 def get_files(data_dir):
@@ -47,3 +51,65 @@ def ensure_dir(directory):
 
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+def get_name_without_extension(name):
+    """
+    Returns the filename without extension
+    """
+
+    return ''.join(os.path.basename(name).split('.')[:-1])
+
+
+def unzip_file(zip_file, target_dir=None):
+    """
+    Unzips the 'zip_file' into the 'target_dir'
+    If target is not specified, filename will be used
+    Returns the name of the directory the contents are zipped into
+    """
+
+    if target_dir is None:
+        target_dir = get_name_without_extension(zip_file)
+
+    z = zipfile.ZipFile(zip_file)
+    z.extractall(target_dir)
+    z.close()
+
+    return target_dir
+
+
+def delete_dir(target_dir):
+    """
+    Deletes the specified directory recursively
+    """
+
+    shutil.rmtree(target_dir, ignore_errors=True)
+
+
+def save_list_to_file(target_path, list_to_save):
+    """
+    Saves the provided list into the specified path
+    """
+
+    np.savetxt(target_path, list_to_save, fmt='%s')
+
+
+def save_dict_to_file(target_path, dict_to_save):
+    """
+    Saves the provided dictionary into the specified path
+    """
+
+    writer = csv.writer(open(target_path, 'wb'))
+
+    for key, value in dict_to_save.items():
+        try:
+            writer.writerow([key, value])
+        except:
+            pass
+
+
+def move_dir(source, target):
+    """
+    Moves the source directory to the target directory
+    """
+
+    shutil.move(source, target)

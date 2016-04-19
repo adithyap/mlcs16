@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import helper
 
 
-def process_dir(data_dir):
+def process_dir(data_dir, b_size=None):
     """
     Processes a directory containing a set of case documents and extracts the case data.
     The case data thus extracted shall be stored in {data_dir}/txt/.
@@ -12,9 +12,14 @@ def process_dir(data_dir):
 
     case_files = helper.get_files(data_dir)
 
-    ops = parse_files(case_files)
+    if b_size is not None:
+        case_files = case_files[:b_size]
 
-    write_files(ops, os.path.join(data_dir, 'txt'))
+    target_path = os.path.join(data_dir, 'txt')
+
+    write_files(parse_files(case_files), target_path)
+
+    return target_path
 
 
 def parse_files(files):
@@ -26,9 +31,9 @@ def parse_files(files):
 
     ops = []
 
-    for i in range(len(files)):
+    for f in files:
 
-        ops.append((get_case_data(files[i])))
+        ops.append((get_case_data(f)))
 
     return ops
 
