@@ -3,13 +3,11 @@ import generate_case_data
 import generate_n_grams
 import time
 import os
+from joblib import Parallel, delayed
+import multiprocessing
 
-files = [x for x in helper.get_files('.') if x.endswith('_complete.zip')]
 
-save_dir = 'data'
-helper.ensure_dir(save_dir)
-
-for f in files:
+def process_file(f):
 
     start = time.time()
 
@@ -31,8 +29,19 @@ for f in files:
 
     helper.delete_dir(f_name)
 
-    break
+
+def main():
+
+    files = [x for x in helper.get_files('.') if x.endswith('_complete.zip')]
+
+    num_cores = multiprocessing.cpu_count()
+
+    Parallel(n_jobs=num_cores)(delayed(process_file)(f) for f in files)
 
 
+if __name__ == '__main__':
 
+    save_dir = 'data'
+    helper.ensure_dir(save_dir)
 
+    main()
