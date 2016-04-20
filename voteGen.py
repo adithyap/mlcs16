@@ -11,20 +11,20 @@ import time
 
 # In[41]:
 
-pd.set_option('max_rows',2000)
-pd.set_option('max_columns',2000)
-np.set_printoptions()
+#pd.set_option('max_rows',2000)
+#pd.set_option('max_columns',2000)
+#np.set_printoptions()
 
 
 # In[71]:
-
+start=time.time()
 #df = pd.read_stata('/scratch/sv1239/projects/mlcs/raw/Votelevel_stuffjan2013.dta')
 df = pd.read_stata('Votelevel_stuffjan2013.dta')
-
-
+print 'finish reading data'
+print time.time()-start
 # In[72]:
 
-df.shape
+print df.shape
 
 
 # In[73]:
@@ -68,7 +68,7 @@ for i in moredropcolumns:
 
 # In[77]:
 
-#df.shape
+print df.shape
 
 
 # In[52]:
@@ -151,7 +151,7 @@ newframe=newframe.drop('index',1)
 assert newframe.shape[0]==len(output)
 #print newframe.shape
 
-
+print time.time()-start
 # In[54]:
 
 ## remove the columns that we are done with
@@ -210,8 +210,8 @@ newframe=newframe.fillna(value=0)
 # In[63]:
 
 newframe.to_csv('out.csv')
-
-
+(pd.DataFrame(output)).to_csv('output.csv')
+print time.time()-start
 # In[ ]:
 
 
