@@ -19,7 +19,7 @@ import time
 # In[71]:
 start=time.time()
 #df = pd.read_stata('/scratch/sv1239/projects/mlcs/raw/Votelevel_stuffjan2013.dta')
-df = pd.read_stata('Votelevel_stuffjan2013.dta')
+df = pd.read_stata('/scratch/sv1239/projects/mlcs/raw/Votelevel_stuffjan2013.dta')
 print 'finish reading data'
 print time.time()-start
 # In[72]:
@@ -209,8 +209,8 @@ newframe=newframe.fillna(value=0)
 
 # In[63]:
 
-newframe.to_csv('out.csv')
-(pd.DataFrame(output)).to_csv('output.csv')
+newframe.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/out2.csv')
+(pd.DataFrame(output)).to_csv('/scratch/sv1239/projects/mlcs/mlcs16/output2.csv')
 print time.time()-start
 # In[ ]:
 
