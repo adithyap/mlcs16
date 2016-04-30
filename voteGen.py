@@ -109,7 +109,7 @@ for case in caseList:
             
 newframe=newframe.reset_index()              ## need to reset the index, otherwise will all be 0
 newframe=newframe.drop('index',1)  
-
+print "done with all cases"
 #assert newframe.shape[0]==len(output)
 
 print time.time()-start
@@ -118,7 +118,7 @@ print newframe.head()
 ## remove the columns that we are done with
 newframe.drop(labels=['casenum','j2vote1','j2vote2','j2maj1','direct1',
                       'j2maj2','j3vote1','j3vote2','j3maj1','j3maj2','majvotes','ids'],axis=1,inplace=True)
-
+print "dropped some labels"
 
 new_cols=newframe.columns
 
@@ -144,15 +144,17 @@ for col in keep_cols:
 
 #'dL1Ads3' in new_cols
 
-
-newframe=pd.get_dummies(newframe,columns=new_cols,dummy_na=True)
-
-
-newframe=newframe.fillna(value=0)         
-
-
-newframe.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats.csv')
+newframe.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats_without_dummies.csv')
 (pd.DataFrame(output)).to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_outs.csv')
+
+newframe_sparse=pd.get_dummies(newframe,columns=new_cols,dummy_na=True,sparse=True)
+
+newframe_sparse=newframe_sparse.fillna(value=0)         
+newframe_sparse.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats_with_dummies_sparse.csv')
+
+newframe2=pd.get_dummies(newframe,columns=new_cols,dummy_na=True,sparse=False)
+newframe2=newframei2.fillna(value=0)         
+newframe2.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats_with_dummies_norm.csv')
 print time.time()-start
 
 
