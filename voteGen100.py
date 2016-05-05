@@ -74,6 +74,7 @@ df.Dissenting1=df.Dissenting1.fillna(value=0)   ## this value tells which judge 
 
 nterm=df.columns.tolist().index('Term')         ## prepare to copy the features after and including 'Term' 
 copylist=df.columns.tolist()[nterm:]            ## because thoes are features of judge's biography
+copylist.append('judgeidentificationnumber')
 
 caseList=pd.unique(df['caseid'])
 caseList=caseList[pd.notnull(caseList)].tolist()
