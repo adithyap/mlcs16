@@ -26,13 +26,14 @@ del_cols = ['fileid','cite','vol','beginpg','endopin','endpage','docnum','priorp
             'codej12','j12vote1','j12vote2','j12maj1','j12maj2','codej13','j13vote1','j13vote2','j13maj1','j13maj2',
             'codej14','j14vote1','j14vote2','j14maj1','j14maj2','codej15','j15vote1','j15vote2','j15maj1','j15maj2','j16maj1','j16vote1']
 
-df.drop(labels=del_cols,axis=1,inplace=True)
+#df.drop(labels=del_cols,axis=1,inplace=True)
 
 
-moredropcolumns=df.columns.tolist() # .tolist?
-for i in moredropcolumns:
-    if len(pd.unique(df[i]))==1:
-        df.drop(labels=i,axis=1,inplace=True)
+#more
+columns=df.columns.tolist() # .tolist?
+#for i in moredropcolumns:
+#    if len(pd.unique(df[i]))==1:
+#        df.drop(labels=i,axis=1,inplace=True)
 
 print df.shape
 
@@ -116,8 +117,8 @@ print time.time()-start
 print newframe.columns
 print newframe.head()
 ## remove the columns that we are done with
-newframe.drop(labels=['casenum','j2vote1','j2vote2','j2maj1','direct1',
-                      'j2maj2','j3vote1','j3vote2','j3maj1','j3maj2','majvotes','ids'],axis=1,inplace=True)
+#newframe.drop(labels=['casenum','j2vote1','j2vote2','j2maj1','direct1',
+#                      'j2maj2','j3vote1','j3vote2','j3maj1','j3maj2','majvotes','ids'],axis=1,inplace=True)
 print "dropped some labels"
 
 new_cols=newframe.columns
@@ -144,17 +145,17 @@ for col in keep_cols:
 
 #'dL1Ads3' in new_cols
 
-newframe.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats_without_dummies.csv')
-(pd.DataFrame(output)).to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_outs.csv')
+newframe.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats_without_dummies_2.csv')
+(pd.DataFrame(output)).to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_outs_2.csv')
 
-newframe_sparse=pd.get_dummies(newframe,columns=new_cols,dummy_na=True,sparse=True)
-
-newframe_sparse=newframe_sparse.fillna(value=0)         
-newframe_sparse.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats_with_dummies_sparse.csv')
-
-newframe2=pd.get_dummies(newframe,columns=new_cols,dummy_na=True,sparse=False)
-newframe2=newframei2.fillna(value=0)         
-newframe2.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats_with_dummies_norm.csv')
+#newframe_sparse=pd.get_dummies(newframe,columns=new_cols,dummy_na=True,sparse=True)
+#
+#newframe_sparse=newframe_sparse.fillna(value=0)         
+#newframe_sparse.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats_with_dummies_sparse.csv')
+#
+#newframe2=pd.get_dummies(newframe,columns=new_cols,dummy_na=True,sparse=False)
+#newframe2=newframei2.fillna(value=0)         
+#newframe2.to_csv('/scratch/sv1239/projects/mlcs/mlcs16/final_feats_with_dummies_norm.csv')
 print time.time()-start
 
 
