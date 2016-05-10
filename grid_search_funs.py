@@ -1,5 +1,13 @@
 import pandas as pd
 import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.grid_search import GridSearchCV
+from sklearn.metrics import accuracy_score,make_scorer,f1_score,classification_report,average_precision_score
+from sklearn.preprocessing import Normalizer,MinMaxScaler,StandardScaler,normalize
+from sklearn.cross_validation import train_test_split
+import multiprocessing
 
 #############################################
 # PANDAS HELPERS
@@ -75,8 +83,8 @@ def get_x_y(n_rows=None):
     #fill_nas(0, df)
     for y in df_y.columns:
         if len(pd.unique(df_y.ix[:,y]))==2:
-		y=df_y.ix[:,y].values
-		break
+            y=df_y.ix[:,y].values
+            break
     return df.values, y
 
 
@@ -101,15 +109,10 @@ def grid_search(X, y, clf, param_grid, n_jobs=1):
     scorer = make_scorer(average_precision_score)
 
 
-    gridclf = GridSearchCV(clf, paramgrid, scoring=scorer, cv=3, verbose=1, n_jobs=n_jobs)
+    gridclf = GridSearchCV(estimator=clf, param_grid=param_grid, scoring=scorer, cv=3, verbose=1, n_jobs=n_jobs)
 
     gridclf.fit(X, y)
-
-    print gridclf.best_params_
-    print gridclf.best_estimator_
-
-    print_report(y_test, gridclf.predict(X_test))
-    
+   
     return gridclf
 
 
@@ -184,9 +187,9 @@ def dummify(df):
 #    df.drop(labels=remove_for_now,inplace=True,axis=1)
  
     for x in remove_for_now:
-    	if x in df.columns:
-        	print "dropped: ",x
-        	df.drop(labels=[x],inplace=True,axis=1)
+        if x in df.columns:
+            print "dropped: ",x
+            df.drop(labels=[x],inplace=True,axis=1)
     
     sum1=0
     
