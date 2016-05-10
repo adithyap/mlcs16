@@ -1,3 +1,5 @@
+import pandas as pd
+import numpy as np
 
 #############################################
 # PANDAS HELPERS
@@ -35,6 +37,47 @@ def fill_nas(value, data_frame):
 #############################################
 # DATA RETRIEVAL HELPERS
 #############################################
+
+def get_data(n_rows=None):
+    
+    if n_rows is not None:
+        df = pd.read_csv('final_feats_without_dummies_3.csv', low_memory=False, nrows=n_rows)
+        df_y = pd.read_csv('final_outs_3.csv', low_memory=False, nrows=n_rows)
+    else:
+        df = pd.read_csv('final_feats_without_dummies_3.csv', low_memory=False)
+        df_y = pd.read_csv('final_outs_3.csv', low_memory=False)
+    
+    
+    # Drop labels and a redundant column
+    remove_columns_from_data_frame(['Unnamed: 0', 'Unnamed: 0.1' 'dissent', 'dissentdummy'], df)
+#     df,df_y=remove_bad_rows(df,df_y)
+#     df=drop_unneeded_cols(df)
+#     df=drop_dissent(df)
+#     df=dummify(df)
+    
+    # Extras -- for analysis
+    # CASE 1: REMOVE TOP 2
+    # CASE 2: REMOVE ALL 'DISS'
+    
+#     remove_columns_from_data_frame(['type', 'turnonthresh'], df)
+#     remove_columns_from_data_frame(['type1', 'last3'], df)
+#     remove_columns_like('diss', df)
+    if ('Unnamed: 0' or 'Unnamed: 0.1') in df_y.columns:
+        df_y.drop(labels=['Unnamed: 0','Unnamed: 0.1'],axis=1,inplace=True)
+    
+    return df, df_y
+
+
+def get_x_y(n_rows=None):
+    
+    df, df_y = get_data(n_rows)
+
+    #fill_nas(0, df)
+    for y in df_y.columns:
+        if len(pd.unique(df_y.ix[:,y]))==2:
+		y=df_y.ix[:,y].values
+		break
+    return df.values, y
 
 
 def get_columns():
