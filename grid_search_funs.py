@@ -31,9 +31,9 @@ def remove_columns_from_data_frame(cols_to_remove, data_frame):
 
 def remove_columns_like(column_pattern, data_frame):
     
-    for column in list(data_frame.columns):
-        if column_pattern in column:
-            data_frame.drop(column, axis=1, inplace=True)
+    to_remove = [x for x in list(data_frame.columns) if column_pattern in x]
+
+    return remove_columns_from_data_frame(to_remove, data_frame)
 
 
 def fill_nas(value, data_frame):
@@ -49,23 +49,27 @@ def fill_nas(value, data_frame):
 def get_data(n_rows=None):
     
     if n_rows is not None:
-        df = pd.read_csv('final_feats_without_dummies_3.csv', low_memory=False, nrows=n_rows)
+        # df = pd.read_csv('final_feats_without_dummies_3.csv', low_memory=False, nrows=n_rows)
+        df = pd.read_csv('final_feats_4.csv', low_memory=False, nrows=n_rows)
         df_y = pd.read_csv('final_outs_3.csv', low_memory=False, nrows=n_rows)
     else:
-        df = pd.read_csv('final_feats_without_dummies_3.csv', low_memory=False)
+        # df = pd.read_csv('final_feats_without_dummies_3.csv', low_memory=False)
+        df = pd.read_csv('final_feats_4.csv', low_memory=False)
         df_y = pd.read_csv('final_outs_3.csv', low_memory=False)
     
     
     # Drop labels and a redundant column
-    remove_columns_from_data_frame(['Unnamed: 0', 'Unnamed: 0.1' 'dissent', 'dissentdummy'], df)
-#     df,df_y=remove_bad_rows(df,df_y)
-#     df=drop_unneeded_cols(df)
-#     df=drop_dissent(df)
-#     df=dummify(df)
+    # remove_columns_from_data_frame(['Unnamed: 0', 'Unnamed: 0.1' 'dissent', 'dissentdummy'], df)
+    # df,df_y=remove_bad_rows(df,df_y)
+    # df=drop_unneeded_cols(df)
+    # df=drop_dissent(df)
+    # df=dummify(df)
     
     # Extras -- for analysis
     # CASE 1: REMOVE TOP 2
     # CASE 2: REMOVE ALL 'DISS'
+
+    remove_columns_like('Unnamed', df)
     
 #     remove_columns_from_data_frame(['type', 'turnonthresh'], df)
 #     remove_columns_from_data_frame(['type1', 'last3'], df)
@@ -160,10 +164,12 @@ def drop_unneeded_cols(df):
             'codej12','j12vote1','j12vote2','j12maj1','j12maj2','codej13','j13vote1','j13vote2','j13maj1','j13maj2',
             'codej14','j14vote1','j14vote2','j14maj1','j14maj2','codej15','j15vote1','j15vote2','j15maj1','j15maj2','j16maj1','j16vote1']
     df.drop(labels=del_cols,axis=1,inplace=True)
+    
     moredropcolumns=df.columns.tolist() # .tolist?
     for i in moredropcolumns:
         if len(pd.unique(df[i]))==1:
             df.drop(labels=i,axis=1,inplace=True)
+
     df.drop(labels=['casenum','j2vote1','j2vote2','j2maj1','direct1',
                           'j2maj2','j3vote1','j3vote2','j3maj1','j3maj2','majvotes','ids'],axis=1,inplace=True)
     return df
@@ -205,6 +211,7 @@ def dummify(df):
     df2=pd.get_dummies(df,columns=dummy_cols,dummy_na=True,sparse=True)
     print df2.shape
     df2.fillna(value=0,inplace=True)
+
     return df2
 
 
